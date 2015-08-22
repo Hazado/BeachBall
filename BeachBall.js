@@ -6,9 +6,14 @@ BeachBall.lootBoxes = ['boosts', 'badges', 'hpt', 'ninj', 'chron', 'cyb', 'bean'
 //dimen,varie, //v4.0 addition: need to be slotted in on the update. Commented out for obvious reasons
 'prize', 'discov', 'monums', 'monumg', 'tagged', 'badgesav'];
 BeachBall.resetCaged = 0;
+BeachBall.decreeNames = [];
+for (var decree in Molpy.PapalDecrees) {
+	BeachBall.decreeNames.push(decree);
+}
+BeachBall.popeGrace = 0;
 
 //Version Information
-BeachBall.version = '5.3.2';
+BeachBall.version = '5.4.0';
 BeachBall.SCBversion = '3.667'; //Last SandCastle Builder version tested
 
 // NOTE: Tons of audio info here, although audio has been removed. Maybe in the future it can be readded, so the code can stay.
@@ -872,6 +877,18 @@ BeachBall.ClearLog = function() {
     }
 }
 
+BeachBall.Pope = function() {
+	if (BeachBall.popeGrace > 0) {
+		BeachBall.popeGrace -= BeachBall.Settings['RefreshRate'].setting / 1000;
+	} else if (!Molpy.Boosts['The Pope'].power && BeachBall.Settings['ThePope'].status > 0) {
+		var decName = BeachBall.decreeNames[BeachBall.Settings['ThePope'].status - 1];
+		var decree = Molpy.PapalDecrees[decName];
+		if (decree.avail()) {
+			Molpy.SelectPapalDecree(decName);
+		}
+	}
+}
+
 BeachBall.FavsAutoclick = {};
 
 BeachBall.ChooseAutoclick = function () {
@@ -1215,6 +1232,30 @@ BeachBall.LoadDefaultSetting = function (option, key) {
 		if (key == 'setting')	{return 0;}
 		if (key == 'desc')		{return ['Off', 'On'];}
 	}
+	else if (option == 'ThePope') {
+		if (key == 'title')		{return 'The Pope: Decree AutoSelect';}
+		if (key == 'status') 	{return 0;}
+		if (key == 'maxStatus') {return BeachBall.decreeNames.length;}
+		if (key == 'setting')	{return 5;}
+		if (key == 'minSetting'){return 0;}
+		if (key == 'maxSetting'){return 30;}
+		if (key == 'msg')		{return 'Please enter your desired grace time for The Pope (0 - 30) seconds:';}
+		if (key == 'desc') {
+			var popeDescList = ['None<br/>Switch grace time: <a onclick="BeachBall.SwitchSetting(\'ThePope\')">' + BeachBall.Settings[option].setting + ' sec</a>'];
+			for (var decNum = 0; decNum < BeachBall.decreeNames.length; decNum++) {
+				var decree = Molpy.PapalDecrees[BeachBall.decreeNames[decNum]];
+				var mod = decree.value > 1 ? (( decree.value*Molpy.PapalBoostFactor -1)*100) : 
+							     ((1-decree.value/Molpy.PapalBoostFactor)*100);
+				var desc = decree.desc.replace(/XX/,mod.toFixed(2));
+				if (!decree.avail()) {
+					desc = '<del>' + desc + '</del>';
+				}
+				desc = (decNum+1) + "/" + BeachBall.decreeNames.length + "<br/>" + desc;
+				popeDescList.push(desc);
+			}
+			return popeDescList;
+		}
+	}
 	else {
 		Molpy.Notify(BeachBall.Settings[option] + ' setting not found. Please contact developer.', 1);
 		return -1;
@@ -1223,7 +1264,7 @@ BeachBall.LoadDefaultSetting = function (option, key) {
 
 BeachBall.LoadSettings = function() {
 	BeachBall.AllOptions = [/*'AudioAlerts', */'BeachAutoClick', 'NinjaMode', 'CagedAutoClick', 'LCSolver', 'MHAutoClick', 'RefreshRate',
-	                        'RKAutoClick', 'KnightActions', 'ToolFactory', 'RiftAutoClick', "ClearLog"];
+	                        'RKAutoClick', 'KnightActions', 'ToolFactory', 'RiftAutoClick', 'ThePope', "ClearLog"];
 	BeachBall.AllOptionsKeys = ['title', 'status', 'maxStatus', 'setting', 'minSetting', 'maxSetting', 'msg', 'desc'];
 	BeachBall.SavedOptionsKeys = ['status', 'setting'];
 	BeachBall.Settings = {};
@@ -1279,12 +1320,18 @@ BeachBall.SwitchSetting = function(option) {
 
 BeachBall.SwitchStatus = function(option) {
 	var me = BeachBall.Settings[option];
-		me.status++;
-		if (me.status > me.maxStatus) {
-			me.status = 0;
-		}
-		if (option == 'ToolFactory')
-			BeachBall.LoadToolFactory();
+	me.status++;
+	if (me.status > me.maxStatus) {
+		me.status = 0;
+	}
+	if (option == 'ToolFactory') {
+		BeachBall.LoadToolFactory();
+	}
+	
+	// The Pope grace period
+	if (option == 'ThePope') {
+		BeachBall.popeGrace = me.setting;
+	}
 		
 	/*if ((option == 'RKAutoClick' && me.status == 2) || (option == 'CagedAutoClick' && me.status == 1)) {
 		BeachBall.Settings['LCSolver'].status = 1;
@@ -1322,6 +1369,7 @@ BeachBall.SpyRefresh = function () {
 function BeachBallMainProgram() {
 	//Molpy.Notify('Tick', 0);
 	BeachBall.Time_to_ONG = Molpy.NPlength - Molpy.ONGelapsed/1000;
+	BeachBall.Pope();
 	BeachBall.Ninja();
 	BeachBall.RedundaKitty();
 	BeachBall.CagedAutoClick();
