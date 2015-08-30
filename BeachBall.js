@@ -1,5 +1,6 @@
 //Declare and Initialize Variables
 var BeachBall = {};
+BeachBall.enabled = true;
 BeachBall.incoming_ONG = 0;
 BeachBall.Time_to_ONG = 1800000;
 BeachBall.lootBoxes = ['boosts', 'badges', 'hpt', 'ninj', 'chron', 'cyb', 'bean', 'ceil', 'drac', 'stuff', 'land', 
@@ -13,7 +14,7 @@ for (var decree in Molpy.PapalDecrees) {
 BeachBall.popeGrace = 0;
 
 //Version Information
-BeachBall.version = '5.4.2';
+BeachBall.version = '5.4.3';
 BeachBall.SCBversion = '3.667'; //Last SandCastle Builder version tested
 
 // NOTE: Tons of audio code has been commented.
@@ -723,13 +724,19 @@ BeachBall.RiftAutoClick = function () {
 		return;
 	}
 	
-	// Time Lord check	
+	// If the ONG is about to hit, possibly NWWI?
+	if (BeachBall.Time_to_ONG > 1 && BeachBall.Time_to_ONG < 32 && BeachBall.Settings['RiftAutoClick'].status == 3) {
+		BeachBall.NWWI();
+	}
+	
+	// Time Lord check
 	if (!(Molpy.Got('Time Lord') && Molpy.Boosts['Time Lord'].power)) {
 		return;
 	}
 	
-	// If the ONG is about to hit, possibly FluxHarvest and/or NWWI?
-	if (BeachBall.Time_to_ONG < 5 && BeachBall.Settings['RiftAutoClick'].status >= 2) {
+	// If the ONG is about to hit, possibly FluxHarvest - regardless skip any further rift action
+	// We must Harvest in time for any rifts to dissipate before the ONG.
+	if (BeachBall.Time_to_ONG < 32 && BeachBall.Settings['RiftAutoClick'].status >= 2) {
 		// Check for Flux Harvest desirability.
 		// We must have Flux Harvest, and finite Flux.
 		// - If Fertiliser is inactive, or would not activate anyway, pop FluxHarvest.
@@ -738,10 +745,6 @@ BeachBall.RiftAutoClick = function () {
 				(!Molpy.IsEnabled('Fertiliser') || Molpy.Level('Time Lord') < 100 || !Molpy.Has('Bonemeal', Math.ceil(1000+Molpy.Boosts['Bonemeal'].power/50)) ||
 				(Molpy.Level('Time Lord') * Math.pow(1.001,Molpy.Boosts['Bonemeal'].power/2000) >= Molpy.Boosts['Time Lord'].bought && Molpy.Has('Bonemeal', 2000000)))) {
 			Molpy.FluxHarvest();
-		}
-		// Now Where Was I? if that setting is enabled.
-		if (BeachBall.Settings['RiftAutoClick'].status == 3) {
-			BeachBall.NWWI();
 		}
 		return;
 	}
@@ -1163,16 +1166,18 @@ BeachBall.CreateMenu = function() {
 
 BeachBall.DisplayDescription = function(option,type) {
 	var me = BeachBall.Settings[option];
-	// var me = option;
-	description = me.desc[me.status];
+	var description = me.desc[me.status];
+	var title = me.title;
 	
+	// Autoclicker special action
 	if (option == 'BeachAutoClick') {
 		clearInterval(BeachBall.BeachAutoClickTimer);
 		if (me.status >= 2) {
 			BeachBall.BeachAutoClickTimer = setInterval(BeachBall.ClickBeach, 1000/me.setting);
 		}
 	}
-	var title = me.title;
+	
+	// Tool factory special actions
 	if (option == 'ToolFactory') {
 		if (Molpy.Boosts['TF'].bought == 1) {
 			title = '<a onclick="BeachBall.LoadToolFactory()">Tool Factory</a>';
@@ -1187,6 +1192,12 @@ BeachBall.DisplayDescription = function(option,type) {
 		g('BBToolFactory').innerHTML = title;
 		g(option + 'Desc').innerHTML = '<br>' + description;
 	}
+	
+	// The Pope special action
+	if (option == 'ThePope' && type == 'desc') {
+		description = BeachBall.LoadDefaultSetting(option, type)[me.status];
+	}
+	
 	if (type == 'desc') {
 		return description;
 	}
@@ -1196,17 +1207,20 @@ BeachBall.DisplayDescription = function(option,type) {
 }
 
 BeachBall.LoadDefaultSetting = function (option, key) {
+	if (option == 'Meta') {
+		if (key == 'enabled') 	{return true;}
+		if (key == 'graceTime')	{return 5;}
+	}
 	/* Removed: AudioAlert
-	if (option == 'AudioAlerts') {
+	else if (option == 'AudioAlerts') {
 		if (key == 'title')		{return 'Audio Alerts';}
 		if (key == 'status') 	{return 0;}
 		if (key == 'maxStatus') {return 4;}
 		if (key == 'setting')	{return 0;}
 		if (key == 'desc')		{return ['Off', 'RK Only', 'LC Only', 'ONG Only', 'All Alerts'];}
 	}
-	else
 	*/
-	if (option == 'BeachAutoClick') {
+	else if (option == 'BeachAutoClick') {
 		if (key == 'title')		{return 'Beach AutoClick';}
 		if (key == 'status') 	{return 1;}
 		if (key == 'maxStatus') {return 2;}
@@ -1330,6 +1344,7 @@ BeachBall.LoadSettings = function() {
 							'RKAutoClick', 'KnightActions', 'ToolFactory', 'RiftAutoClick', 'ThePope', "ClearLog"];
 	BeachBall.AllOptionsKeys = ['title', 'status', 'maxStatus', 'setting', 'minSetting', 'maxSetting', 'msg', 'desc'];
 	BeachBall.SavedOptionsKeys = ['status', 'setting'];
+	BeachBall.SavedMetaKeys = ['enabled', 'graceTime'];
 	BeachBall.Settings = {};
 	
 	if(typeof(Storage) !== 'undefined') {
@@ -1358,6 +1373,15 @@ BeachBall.LoadSettings = function() {
 		// Do setting conversion here if required
 		
 		localStorage['BB.version'] = BeachBall.version;
+	}
+	
+	for (var i = 0; i < BeachBall.SavedMetaKeys.length; i++) {
+		var meta = BeachBall.SavedMetaKeys[i];
+		if (BeachBall.storage == 1 && localStorage['BB.'+ meta]) {
+			BeachBall[meta] = localStorage['BB.'+ meta];
+		} else {
+			BeachBall[meta] = BeachBall.LoadDefaultSetting('Meta', meta);
+		}
 	}
 
 	for (i = 0; i < BeachBall.AllOptions.length; i++) {
@@ -1389,6 +1413,7 @@ BeachBall.SwitchSetting = function(option) {
 		}
 		me.desc = BeachBall.LoadDefaultSetting(option, 'desc');
 		BeachBall.DisplayDescription(option);
+		Molpy.RefreshOptions();
 	}
 }
 
@@ -1441,16 +1466,18 @@ BeachBall.SpyRefresh = function () {
 
 //Main Program and Loop
 function BeachBallMainProgram() {
-	//Molpy.Notify('Tick', 0);
 	BeachBall.Time_to_ONG = Molpy.NPlength - Molpy.ONGelapsed/1000;
-	BeachBall.Pope();
-	BeachBall.Ninja();
-	BeachBall.RedundaKitty();
-	BeachBall.CagedAutoClick();
-	BeachBall.MontyHaul();
-	BeachBall.RiftAutoClick();
-	BeachBall.ClearLog();
-	BeachBall.StartLoop();
+	if (BeachBall.enabled) {
+		BeachBall.Pope();
+		BeachBall.Ninja();
+		BeachBall.RedundaKitty();
+		BeachBall.CagedAutoClick();
+		BeachBall.MontyHaul();
+		BeachBall.RiftAutoClick();
+		BeachBall.Pope(); // Second run of pope. Just in case things changed due to Rift ONG.
+		BeachBall.ClearLog();
+		BeachBall.StartLoop();
+	}
 }
 
 BeachBall.StartLoop = function () {
