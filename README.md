@@ -32,12 +32,17 @@ This feature is performed using the Faves panel instead of the Options panel.
 
 ## Changelog
 
+###Version 5.5.0
+
+####Features
+* Toggle added to turn BeachBall autoclicking on or off. Click the red BeachBall Settings option to toggle. Turning BeachBall off disables it from clicking anything, but you can still change any options you want.
+
 ###Version 5.4.3
 
 ####Bug Fixes
 * The options display now updates when a setting (such as cps) changes.
 * The Pope will now update what has strikethrough (and the number will update) when the status is changed.
-* Rift - ONG should no longer accidentally uses FluxHarvest right after the ONG.
+* Rift - ONG should no longer use FluxHarvest too close to the ONG.
 * Rift - ONG NWWI should attempt a last minute NWWI? to rectify cost/timing issues.
 
 ###Version 5.4.2
