@@ -957,7 +957,7 @@ BeachBall.Pope = function() {
 BeachBall.Dragons = function() {
 	if (BeachBall.Settings['DragonQueen'].status == 1 && Molpy.Got('DQ') && (!Molpy.Got('Eggs') || Molpy.Boosts['Eggs'].Level < BeachBall.Settings['DragonQueen'].setting)) {
 		// This is the Dragon Queen button code
-		if(Molpy.Spend({Bonemeal: Molpy.EggCost()}))Molpy.Add('Eggs',1);
+		if(Molpy.Spend({Bonemeal: Molpy.EggCost().bonemeal, Princesses: Molpy.EggCost().princess}))Molpy.Add('Eggs',1);
 	}
 }
 

@@ -33,6 +33,11 @@ This feature is performed using the Faves panel instead of the Options panel.
 
 ## Changelog
 
+###Version 5.6.2
+
+####Fixes
+* Dragon Queen Auto-Egg feature now working again. Keep in mind that eggs above 50 now have a Princess cost.
+
 ###Version 5.6.1
 
 SCB v4.0 compatibility patch. No further changes at this time.
