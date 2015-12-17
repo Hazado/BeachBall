@@ -4,7 +4,7 @@ BeachBall.enabled = true;
 BeachBall.incoming_ONG = 0;
 BeachBall.Time_to_ONG = 1800000;
 BeachBall.lootBoxes = ['boosts', 'badges', 'hpt', 'ninj', 'chron', 'cyb', 'bean', 'ceil', 'drac', 'stuff', 'land', 
-//dimen,varie, //v4.0 addition: need to be slotted in on the update. Commented out for obvious reasons
+'dimen', 'varie', // v4.0 addition
 'prize', 'discov', 'monums', 'monumg', 'tagged', 'badgesav'];
 BeachBall.resetCaged = 0;
 BeachBall.decreeNames = [];
@@ -14,8 +14,8 @@ for (var decree in Molpy.PapalDecrees) {
 BeachBall.popeGrace = 0;
 
 //Version Information
-BeachBall.version = '5.6.0';
-BeachBall.SCBversion = '3.667'; //Last SandCastle Builder version tested
+BeachBall.version = '5.6.1';
+BeachBall.SCBversion = '4.0'; //Last SandCastle Builder version tested
 
 // NOTE: Tons of audio code has been commented.
 // NOTE: To re-enable audio, uncomment 'AudioAlert' comments.
