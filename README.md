@@ -33,6 +33,11 @@ This feature is performed using the Faves panel instead of the Options panel.
 
 ## Changelog
 
+###Version 5.6.3
+
+####Changes
+* Removed some logic from Caged Logicat: Solve Max that prevented end game players from using this feature.
+
 ###Version 5.6.2
 
 ####Fixes
