@@ -33,6 +33,12 @@ This feature is performed using the Faves panel instead of the Options panel.
 
 ## Changelog
 
+###Version 5.6.4
+
+####Fixes
+* Removed the "Strength Potion" placeholder option from the Knights options, which never did anything anyway - and now never will.
+* Fixed the "Breath" option for Knights, which wasn't updated for when breath actually became an option in SCB 4.0.
+
 ###Version 5.6.3
 
 ####Changes

@@ -14,7 +14,7 @@ for (var decree in Molpy.PapalDecrees) {
 BeachBall.popeGrace = 0;
 
 //Version Information
-BeachBall.version = '5.6.1';
+BeachBall.version = '5.6.4';
 BeachBall.SCBversion = '4.0'; //Last SandCastle Builder version tested
 
 // NOTE: Tons of audio code has been commented.
@@ -869,13 +869,15 @@ BeachBall.RedundaKitty = function() {
 		
 		//Fight Knights
 		else if (Molpy.Redacted.drawType[0]=='knight' && meKnight.status > 0) {
-			if (meKnight.status == 1) {
+			// We only fire breath if its available - this check is straight from the button display code
+			if (meKnight.status == 2 &&
+					Molpy.NPdata[np].breath > 0 && Molpy.Boosts['DQ'].Level >=3 && !Molpy.Boosts['Dragon Breath'].countdown) {
+				// Currently there is only one breath, so we don't have to figure out which type we're using.
+				Molpy.DragonKnightAttack(0);
+			// We default to attack if no breath
+			} else if (meKnight.status == 1 || meKnight.status == 2) {
 				Molpy.DragonKnightAttack();
-			} else if (meKnight.status == 2) {
-				Molpy.DragonKnightAttack(1);
 			} else if (meKnight.status == 3) {
-				Molpy.DragonKnightAttack(2);
-			} else if (meKnight.status == 4) {
 				// Hide the Knight at the less second
 				if (BeachBall.RKTimer <= 3) {
 					Molpy.DragonsHide(0);
@@ -1296,9 +1298,9 @@ BeachBall.LoadDefaultSetting = function (option, key) {
 	else if (option == 'KnightActions') {
 		if (key == 'title')		{return 'Knight AutoClick';}
 		if (key == 'status') 	{return 0;}
-		if (key == 'maxStatus') {return 4;}
+		if (key == 'maxStatus') {return 3;}
 		if (key == 'setting')	{return 0;}
-		if (key == 'desc')		{return ['Off', 'Attack', 'Strength Potion', 'Breath<br/>(Placeholder)', 'Hide<br/>(Triggers at <= 3mNP)'];}
+		if (key == 'desc')		{return ['Off', 'Attack', 'Breath', 'Hide<br/>(Triggers at <= 3mNP)'];}
 	}
 	else if (option == 'ToolFactory') {
 		if (key == 'title')		{return 'Tool Factory';}
@@ -1364,6 +1366,34 @@ BeachBall.LoadDefaultSetting = function (option, key) {
 	}
 }
 
+// Version Compare
+// Returns
+// < 0 if v1 < v2
+// > 0 if v1 > v2
+// = 0 if v1 = v2
+BeachBall.VerCompare = function(v1, v2) {
+	var v1arr = v1.split('.');
+	var v2arr = v2.split('.');
+	var n1 = 0;
+	var n2 = 0;
+	var maxlen = Math.min(v1arr.length, v2arr.length);
+	for (var i = 0; i < maxlen; i++) {
+		n1 = Number(v1arr[i]);
+		n2 = Number(v2arr[i]);
+		if (n1 < n2) {
+			return -1;
+		} else if (n2 < n1) {
+			return 1;
+		}
+	}
+	if (v1arr.length < v2arr.length) {
+		return -1;
+	} else if (v1arr.length > v2arr.length) {
+		return 1;
+	}
+	return 0;
+}
+
 BeachBall.LoadSettings = function() {
 	/* Removed AudioAlert
 	The option 'AudioAlerts' was removed from the front of BeachBall.AllOptions
@@ -1402,6 +1432,15 @@ BeachBall.LoadSettings = function() {
 		var oldVersion = localStorage['BB.version'];
 		
 		// Do setting conversion here if required
+		if (oldVersion) {
+			// 5.6.4 removed placeholder setting from Knights at index 2
+			if (BeachBall.VerCompare(oldVersion, '5.6.4') < 0) {
+				var ka = Number(localStorage['BB.KnightActions.status']);
+				if (ka >= 2) {
+					localStorage['BB.KnightActions.status'] = ka - 1;
+				}
+			}
+		}
 		
 		localStorage['BB.version'] = BeachBall.version;
 	}
