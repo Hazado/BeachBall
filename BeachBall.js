@@ -871,7 +871,7 @@ BeachBall.RedundaKitty = function() {
 		else if (Molpy.Redacted.drawType[0]=='knight' && meKnight.status > 0) {
 			// We only fire breath if its available - this check is straight from the button display code
 			if (meKnight.status == 2 &&
-					Molpy.NPdata[np].breath > 0 && Molpy.Boosts['DQ'].Level >=3 && !Molpy.Boosts['Dragon Breath'].countdown) {
+					Molpy.NPdata[Molpy.Redacted.opponents.target].breath > 0 && Molpy.Boosts['DQ'].Level >=3 && !Molpy.Boosts['Dragon Breath'].countdown) {
 				// Currently there is only one breath, so we don't have to figure out which type we're using.
 				Molpy.DragonKnightAttack(0);
 			// We default to attack if no breath
