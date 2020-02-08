@@ -18,7 +18,7 @@ Helper addon for Sandcastle Builder (http://castle.chirpingmustard.com/castle.ht
 
 ## How to use this script ?
 
-Start by installing this script (http://github.com/codeRitter/BeachBall) using one of two methods:
+Start by installing this script (http://github.com/seraphina985/BeachBall) using one of two methods:
 
 A. If you have Greasemonkey (for Firefox) or Tampermonkey (for Chrome), install BeachBall_Monkey_Loader.js (instuctions for using Xmonkey can be found elsewhere). The BeachBall addon will automatically load 5 seconds after loading the game page (you must reload the game page once after installing - don't forget to save).
 
@@ -32,6 +32,11 @@ This feature is performed using the Faves panel instead of the Options panel.
 * To disable (or view) a Faves autoclicker, select the boost in the Faves panel and toggle 'Visible' on. On the visible Fave boost, there should be a timer adjacent to the category label (looks like '[ 1s ]'). Click this timer to disable the boost autoclicker.
 
 ## Changelog
+
+###Version 5.6.4.1
+
+####Fixes
+* Fixed BeachBall not loading when the game is accessed over https, loader now works on all game URL's
 
 ###Version 5.6.4
 
